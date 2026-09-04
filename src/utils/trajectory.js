@@ -78,6 +78,20 @@ export function formatTimestamp(unixSeconds) {
 }
 
 /**
+ * Format unix timestamp to date and time string.
+ */
+export function formatDateTime(unixSeconds) {
+  return new Date(unixSeconds * 1000).toLocaleString('en-IN', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+}
+
+/**
  * Calculate average speed in km/h from distance (m) and duration (s).
  */
 export function avgSpeedKmh(distanceMeters, durationSeconds) {

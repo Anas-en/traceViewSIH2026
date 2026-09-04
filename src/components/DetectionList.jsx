@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { formatTimestamp } from '../utils/trajectory';
+import { formatDateTime } from '../utils/trajectory';
 
 /**
  * DetectionList — Sidebar showing all detection points as a scrollable timeline.
@@ -48,7 +48,7 @@ export default function DetectionList({ points, activeIndex, onSelect }) {
               <div className="detection-dot" />
               <div className="detection-info">
                 <div className="detection-time">
-                  {formatTimestamp(p.t)}
+                  {formatDateTime(p.t)}
                   {isStart && ' · Start'}
                   {isEnd && ' · End'}
                 </div>
