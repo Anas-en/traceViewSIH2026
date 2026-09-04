@@ -161,13 +161,23 @@ export default function App() {
     currentTimeRef.current = newTime;
     setCurrentTime(newTime);
 
-    // Update vehicle position and bearing
+    // Update vehicle position and bearing (always forward-facing)
     const pos = vehiclePosAt(newTime, pts, mLatLngs, rIndex);
-    if (prevPosRef.current && (prevPosRef.current[0] !== pos[0] || prevPosRef.current[1] !== pos[1])) {
-      const bearing = computeBearing(prevPosRef.current, pos);
+    const forwardTime = Math.min(newTime + 0.1, endTime);
+    const forwardPos = vehiclePosAt(forwardTime, pts, mLatLngs, rIndex);
+    
+    if (pos[0] !== forwardPos[0] || pos[1] !== forwardPos[1]) {
+      const bearing = computeBearing(pos, forwardPos);
       setVehicleBearing(bearing);
+    } else if (newTime === endTime) {
+      // If exactly at the end, look slightly backward to maintain final direction
+      const backwardTime = Math.max(newTime - 0.1, pts[0].t);
+      const backwardPos = vehiclePosAt(backwardTime, pts, mLatLngs, rIndex);
+      if (pos[0] !== backwardPos[0] || pos[1] !== backwardPos[1]) {
+        setVehicleBearing(computeBearing(backwardPos, pos));
+      }
     }
-    prevPosRef.current = pos;
+    
     setVehiclePos(pos);
 
     // Update active detection index
@@ -219,12 +229,24 @@ export default function App() {
     currentTimeRef.current = t;
     setCurrentTime(t);
 
+    // Always point vehicle forward regardless of scrub direction
+    const endTime = pts[pts.length - 1].t;
     const pos = vehiclePosAt(t, pts, mLatLngs, rIndex);
-    if (prevPosRef.current && (prevPosRef.current[0] !== pos[0] || prevPosRef.current[1] !== pos[1])) {
-      const bearing = computeBearing(prevPosRef.current, pos);
+    const forwardTime = Math.min(t + 0.1, endTime);
+    const forwardPos = vehiclePosAt(forwardTime, pts, mLatLngs, rIndex);
+    
+    if (pos[0] !== forwardPos[0] || pos[1] !== forwardPos[1]) {
+      const bearing = computeBearing(pos, forwardPos);
       setVehicleBearing(bearing);
+    } else if (t === endTime) {
+      // At the exact end, look back to find final bearing
+      const backwardTime = Math.max(t - 0.1, pts[0].t);
+      const backwardPos = vehiclePosAt(backwardTime, pts, mLatLngs, rIndex);
+      if (pos[0] !== backwardPos[0] || pos[1] !== backwardPos[1]) {
+        setVehicleBearing(computeBearing(backwardPos, pos));
+      }
     }
-    prevPosRef.current = pos;
+    
     setVehiclePos(pos);
 
     const seg = findSegment(pts, t);
